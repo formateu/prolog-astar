@@ -28,52 +28,61 @@ hScore(e,4).
 % program
 % StepCounter - licznik zaglebien
 
-start_A_star( InitState, StepCounter, MaxCounter, PathCost) :-
+start_A_star( InitState, StepCounter, MaxCounter, NFirstCounter, PathCost) :-
   StepCounter =< MaxCounter,
   score(InitState, 0, 0, InitCost, InitScore) ,
   writeln(StepCounter / MaxCounter),
-  search_A_star( [node(InitState, nil, nil, InitCost , InitScore ) ], [ ], StepCounter, PathCost) .
+  search_A_star( [node(InitState, nil, nil, InitCost , InitScore ) ], [ ], StepCounter, NFirstCounter, NFirstCounter, PathCost) .
 
 
-start_A_star( InitState, StepCounter, MaxCounter, PathCost) :-
+start_A_star( InitState, StepCounter, MaxCounter, NFirstCounter, PathCost) :-
     StepCounter =< MaxCounter,
     NewStepCounter is StepCounter + 1,
-    start_A_star(InitState, NewStepCounter, MaxCounter, PathCost).
+    start_A_star(InitState, NewStepCounter, MaxCounter, NFirstCounter, PathCost).
 
 
-start_A_star( InitState, StepCounter, MaxCounter, PathCost) :-
+start_A_star( InitState, StepCounter, MaxCounter, NFirstCounter, PathCost) :-
     StepCounter > MaxCounter,
     print("Solution not found").
 
 
-search_A_star(Queue, ClosedSet, StepCounter, PathCost) :-
-  fetch(Node, Queue, ClosedSet, RestQueue),
-  continue(Node, RestQueue, ClosedSet, StepCounter, PathCost).
+search_A_star(Queue, ClosedSet, StepCounter, NFirstCounter, NFirstCounterMax, PathCost) :-
+  fetch(Node, Queue, ClosedSet,NFirstCounter, RestQueue),
+  continue(Node, RestQueue, ClosedSet, StepCounter, NFirstCounterMax, PathCost).
 
 
-continue(node(State, Action, Parent, Cost, _ ) , _  ,  ClosedSet, StepCounter,
+continue(node(State, Action, Parent, Cost, _ ) , _  ,  ClosedSet, StepCounter, NFirstCounterMax,
 path_cost(Path, Cost) ) :-
   goal( State),
   !,
   build_path(node(Parent, _ ,_ , _ , _ ) , ClosedSet, [Action/State], Path) .
 
 
-continue(Node, RestQueue, ClosedSet, StepCounter, Path)   :-
+continue(Node, RestQueue, ClosedSet, StepCounter, NFirstCounterMax, Path)   :-
   StepCounter > 0,
   NewStepCounter is StepCounter - 1,
   expand(Node, NewNodes),
   insert_new_nodes(NewNodes, RestQueue, NewQueue),
-  search_A_star(NewQueue, [Node | ClosedSet ], NewStepCounter, Path).
+  search_A_star(NewQueue, [Node | ClosedSet ], NewStepCounter, NFirstCounterMax, NFirstCounterMax, Path).
 
 
 fetch(node(State, Action,Parent, Cost, Score),
-        [node(State, Action,Parent, Cost, Score) |RestQueue], ClosedSet, RestQueue) :-
+        [node(State, Action,Parent, Cost, Score) |RestQueue], ClosedSet, NFirstCounter, RestQueue) :-
     % \+ jest negacja
-    \+ member(node(State, _, _, _, _) , ClosedSet),  !.
+    \+ member(node(State, _, _, _, _) , ClosedSet).
 
-fetch(Node, [ _ |RestQueue], ClosedSet, NewRest) :-
-  fetch(Node, RestQueue, ClosedSet , NewRest).
+fetch(Node, [ _ |RestQueue], ClosedSet, NFirstCounter,  NewRest) :-
+  NFirstCounter > 0,
+  NewNFirstCounter is NFirstCounter - 1,
+  fetch(Node, RestQueue, ClosedSet, NewNFirstCounter, NewRest).
 
+fetch(Node, [Head |RestQueue], [Node |ClosedSet], NFirstCounter, NewRest) :-
+    NFirstCounter > 0,
+    NewNFirstCounter is NFirstCounter - 1,
+    writeln("nawrot"),
+    writeln(NewNFirstCounter),
+    writeln(Head),
+    fetch(Head, RestQueue, ClosedSet, NewNFirstCounter, NewRest).
 
 expand(node(State, _, _, Cost, _), NewNodes)  :-
   print("expanding.. "), writeln(State),
