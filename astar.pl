@@ -60,9 +60,10 @@ path_cost(Path, Cost) ) :-
 
 continue(Node, RestQueue, ClosedSet, StepCounter, NFirstCounterMax, Path)   :-
   StepCounter == 0,
-  writeln("Licznik wyczerpany, czy kontynuowac? y/n"),
-  read(X),
-  X \== y.
+  writeln("Licznik wyczerpany"),
+  1 == 0.
+%read(X),
+%X \== y.
 
 continue(Node, RestQueue, ClosedSet, StepCounter, NFirstCounterMax, Path)   :-
   StepCounter > 0,
