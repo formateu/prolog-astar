@@ -25,9 +25,11 @@ hScore(d,1).
 hScore(e,4).
 
 
+startSample(StepCounter, MaxCounter, NFirstCounter, PathCost) :-
+  start_A_star(a, StepCounter, MaxCounter, NFirstCounter, PathCost).
+
 % program
 % StepCounter - licznik zaglebien
-
 start_A_star(InitState, StepCounter, MaxCounter, NFirstCounter, PathCost) :-
   StepCounter =< MaxCounter,
   score(InitState, 0, 0, InitCost, InitScore) ,
@@ -76,8 +78,8 @@ continue(Node, RestQueue, ClosedSet, StepCounter, NFirstCounterMax, Path)   :-
 fetch(node(State, Action,Parent, Cost, Score),
 [node(State, Action,Parent, Cost, Score) |RestQueue], ClosedSet, NFirstCounter, RestQueue) :-
   % \+ jest negacja
-  \+ member(node(State, _, _, _, _) , ClosedSet),
-  print(State), writeln(" zaakceptowany").
+  \+ member(node(State, _, _, _, _) , ClosedSet).
+  %print(State), writeln(" zaakceptowany").
 
 fetch(Node, [ _ |RestQueue], ClosedSet, NFirstCounter,  NewRest) :-
   NFirstCounter > 0,
@@ -87,8 +89,8 @@ fetch(Node, [ _ |RestQueue], ClosedSet, NFirstCounter,  NewRest) :-
 fetch(Node, RestQueue, [Node|ClosedSet], NFirstCounter, NewRest) :-
   NFirstCounter > 0,
   NewNFirstCounter is NFirstCounter - 1,
+  print("Aktualne wezly: "), read(Choice), !,
   show_states(RestQueue),
-  print("Wybierz wezel: "), read(Choice), !,
   member(node(Choice, _, _, _, _), RestQueue),
   nth0(Pos, RestQueue, node(Choice, _, _, _, _)),
   nth0(Pos, RestQueue, Chosen),
@@ -102,7 +104,7 @@ show_states([node(State, _, _, _, Score)|Rest]) :-
   show_states(Rest).
 
 expand(node(State, _, _, Cost, _), NewNodes)  :-
-  print("expanding.. "), writeln(State),
+  print("expanding.. "), %writeln(State),
   findall(node(ChildState, Action, State, NewCost, ChildScore) ,
   (succ(State, Action, StepCost, ChildState),
     score(ChildState, Cost, StepCost, NewCost, ChildScore) ) ,
@@ -112,7 +114,7 @@ expand(node(State, _, _, Cost, _), NewNodes)  :-
 score(State, ParentCost, StepCost, Cost, FScore)  :-
   Cost is ParentCost + StepCost ,
   hScore(State, HScore),
-  FScore is Cost + HScore .
+  FScore is Cost + HScore.
 
 
 insert_new_nodes([], Queue, Queue).
