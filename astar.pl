@@ -55,21 +55,21 @@ search_A_star(Queue, ClosedSet, StepCounter, NFirstCounter, NFirstCounterMax, Pa
 
 continue(_, _, _, n, _, _, _).
 
-continue(node(State, Action, Parent, Cost, _), _, ClosedSet, StepCounter, _, NFirstCounterMax,
+continue(node(State, Action, Parent, Cost, _), _, ClosedSet, _, StepCounter, _, NFirstCounterMax,
      path_cost(Path, Cost) ) :-
   goal(State),
   !,
   build_path(node(Parent, _ ,_ , _ , _ ) , ClosedSet, [Action/State], Path) .
 
 
-continue(Node, RestQueue, ClosedSet, StepCounter, _, NFirstCounterMax, Path)   :-
+continue(Node, RestQueue, ClosedSet, _, StepCounter, _, NFirstCounterMax, Path)   :-
   StepCounter == 0,
   writeln("Licznik wyczerpany"),
   fail.
 %read(X),
 %X \== y.
 
-continue(Node, RestQueue, ClosedSet, StepCounter, _, NFirstCounter, NFirstCounterMax, Path)   :-
+continue(Node, RestQueue, ClosedSet, _, StepCounter, _, NFirstCounter, NFirstCounterMax, Path)   :-
   StepCounter > 0,
   NewStepCounter is StepCounter - 1,
   expand(Node, NewNodes),
