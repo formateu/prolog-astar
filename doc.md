@@ -1,5 +1,8 @@
 % JPS
 % Przemysław Kopański, Mateusz Forc
+---
+geometry: margin=1.5cm
+---
 
 # Baza wiedzy
 ```prolog
@@ -164,4 +167,75 @@ path_cost([nil/[pos(0,2/2),pos(1,1/3),pos(2,2/3),
           [pos(0,3/1),pos(1,1/3),pos(2,2/3),
            pos(3,3/3),pos(4,1/2),pos(5,2/2),
            pos(6,3/2),pos(7,1/1),pos(8,2/1)]],4)
+```
+
+# Etap 2
+```prolog
+search_A_star(Queue, ClosedSet, PathCost) :-
+  fetch(Node, Queue, ClosedSet, RestQueue, NewClosedSet),
+  continue(Node, RestQueue, NewClosedSet, PathCost).
+
+continue(node(State, Action, Parent, Cost, _), _, ClosedSet, path_cost(Path, Cost)) :-
+  goal(State), ! ,
+  build_path(node(Parent, _, _, _, _) , ClosedSet, [Action/State], Path) .
+
+continue(Node, RestQueue, ClosedSet, Path) :-
+  expand(Node, NewNodes),
+  insert_new_nodes(NewNodes, RestQueue, NewQueue),
+  search_A_star(NewQueue, [Node | ClosedSet], Path).
+
+
+fetch(node(State, Action,Parent, Cost, Score),
+        [node(State, Action,Parent, Cost, Score) |RestQueue],
+        ClosedSet, RestQueue, ClosedSet) :-
+  \+ member(node(State, _, _, _, _), ClosedSet),  !.
+
+fetch(Node, [node(State, Action, Parent, Cost, Score) | RestQueue],
+  ClosedSet, FinalQueueRest, FinalClosedSet) :-
+  member(node(State, _, _, Cost1, _), ClosedSet),
+  Cost < Cost1,
+  replace_node(node(State, Action, Parent, Cost, Score), ClosedSet, NewClosedSet),
+  Diff is Cost1 - Cost,
+  update_nodes_p_queue(State, Diff, ClosedSet, QueueRest, [], NewQueueRest),
+  update_nodes(State, Diff, ClosedSet, NewClosedSet, NewClosedSetUpdated),
+  fetch(Node, NewQueueRest, NewClosedSetUpdated, FinalQueueRest, FinalClosedSet),
+  !.
+
+fetch(Node, [ _ | RestQueue], ClosedSet, NewRest, NewClosedSet):-
+  fetch(Node, RestQueue, ClosedSet, NewRest, NewClosedSet).
+
+replace_node(node(State, Action, Parent, Cost, Score),
+            [node(State, _, _, _, _)|Set],
+            [node(State, Action, Parent, Cost, Score)|Set]):-
+    !.
+
+replace_node(Node, [N|Set], [N|NewSet]):-
+    replace_node(Node, Set, NewSet).
+
+update_nodes(_, _, _, [], []).
+
+update_nodes(RootState, Diff, ClosedSet, [Node|Set], [UpdatedNode|NewSet]):-
+    update_node(RootState, Diff, ClosedSet, Node, UpdatedNode),
+    update_nodes(RootState, Diff, ClosedSet, Set, NewSet).
+
+update_nodes_p_queue(_, _, _, [], Result, Result).
+
+update_nodes_p_queue(RootState, Diff, ClosedSet, [Node|QueueRest], PartialResult, Result):-
+    update_node(RootState, Diff, ClosedSet, Node, UpdatedNode),
+    insert_p_queue(UpdatedNode, PartialResult, PartialResult1),
+    update_nodes_p_queue(RootState, Diff, ClosedSet, QueueRest, PartialResult1, Result).
+
+update_node(RootState, Diff, ClosedSet,
+        node(State,Action,Parent,Cost,Score),
+        node(State,Action,Parent,NewCost,NewScore)):-
+    is_ancestor(node(State, Action, Parent, Cost, Score), RootState, ClosedSet),
+    NewCost is Cost - Diff,
+    NewScore is Score - Diff, !.
+
+update_node(_, _, _, Node, Node).
+
+is_ancestor(node(_, _,RootState, _, _), RootState, _):- !.
+is_ancestor(node(_, _, Parent, _, _), RootState, ClosedSet):-
+    member(node(Parent, Ac, Pa, Co, Sc), ClosedSet),
+    is_ancestor(node(Parent, Ac, Pa, Co, Sc), RootState, ClosedSet).
 ```
