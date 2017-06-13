@@ -30,7 +30,6 @@ succ([pos(0, EmptyPos)|TilePositions], Diffs, Cost, [pos(0, NewEmptyPos)|NewTile
   find_neighbour(EmptyPos, TilePositions, NewEmptyPos, NewTilePositions),
   sum_of_distances([pos(0,EmptyPos)|TilePositions],
                    [pos(0,NewEmptyPos)|NewTilePositions], Cost),
-  writeln(Cost),
   getDiffs([pos(0, EmptyPos)|TilePositions], [pos(0, NewEmptyPos)|NewTilePositions], Diffs).
 
 
@@ -40,8 +39,7 @@ find_neighbour(EmptyPos, [pos(Neighb, NeighbPos)|RestPositions],NeighbPos, [pos(
 
 %%%% zmieniony kod
 find_neighbour(EmptyPos, [T|RestPositions], NewEmptyPos, [T|NewPositions]) :-
-  find_neighbour(EmptyPos, RestPositions, NewEmptyPos, NewPositions),
-  writeln( EmptyPos/NewEmptyPos).
+  find_neighbour(EmptyPos, RestPositions, NewEmptyPos, NewPositions).
 
 
 adjacent(X1/Y1, X2/Y1) :- DiffX is X1-X2,abs(DiffX, 1).
@@ -81,8 +79,8 @@ startSample(PathCost) :-
     , pos(3 , 1/3), pos(4 , 3/1), pos(5 , 1/2)
     , pos(6 , 3/3), pos(7 , 2/1), pos(8 , 2/2) ]
   */
-    [ pos(0 , 2/1), pos(1 , 1/3), pos(2 , 2/3),
-    pos(3 , 3/3), pos(4 , 1/2), pos(5 , 2/2),
+    [ pos(0 , 2/2), pos(1 , 1/3), pos(2 , 2/3),
+    pos(3 , 3/3), pos(4 , 1/2), pos(5 , 2/1),
     pos(6 , 3/2), pos(7 , 1/1), pos(8 , 3/1) ]
   , PathCost).
 

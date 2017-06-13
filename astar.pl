@@ -49,26 +49,21 @@ start_A_star(_, StepCounter, MaxCounter, _, _) :-
 
 
 search_A_star(Queue, ClosedSet, StepCounter, NFirstCounterMax, PathCost) :-
-  fetch(Node, Queue, ClosedSet, UserInput, NFirstCounterMax, RestQueue),
-  continue(Node, RestQueue, ClosedSet, UserInput, StepCounter, NFirstCounterMax, PathCost).
+  fetch(Node, Queue, ClosedSet, _, NFirstCounterMax, RestQueue),
+  continue(Node, RestQueue, ClosedSet, StepCounter, NFirstCounterMax, PathCost).
 
 
-continue(_, _, _, n, _, _, _).
-
-continue(node(State, Action, Parent, Cost, _), _, ClosedSet, _, _, _,
+continue(node(State, Action, Parent, Cost, _), _, ClosedSet, _, _,
      path_cost(Path, Cost) ) :-
   goal(State),
   !,
   build_path(node(Parent, _ ,_ , _ , _ ) , ClosedSet, [Action/State], Path) .
 
-
-continue(_, _, _, _, 0, _, _)   :-
+continue(_, _, _, 0, _, _)   :-
   writeln("Licznik wyczerpany"),
   fail.
-%read(X),
-%X \== y.
 
-continue(Node, RestQueue, ClosedSet, _, StepCounter, NFirstCounterMax, Path)   :-
+continue(Node, RestQueue, ClosedSet, StepCounter, NFirstCounterMax, Path)   :-
   StepCounter > 0,
   NewStepCounter is StepCounter - 1,
   expand(Node, NewNodes),
@@ -79,18 +74,20 @@ continue(Node, RestQueue, ClosedSet, _, StepCounter, NFirstCounterMax, Path)   :
 fetch(node(State, Action,Parent, Cost, Score),
 [node(State, Action,Parent, Cost, Score) |RestQueue], ClosedSet, y, NFirstCounter, RestQueue) :-
   NFirstCounter > 1,
-  write("Fetching.. "), writeln(State),
+  %write("Fetching.. "), writeln(State),
   \+ member(node(State, _, _, _, _) , ClosedSet).
-  %print(State), writeln(" zaakceptowany").
 
 fetch(node(State, Action, Parent, Cost, Score),
  [node(State, Action, Parent, Cost, Score)|RestQueue], ClosedSet, UserInput, NFirstCounter, RestQueue) :-
   NFirstCounter == 1,
   \+ member(node(State, _, _, _, _) , ClosedSet),
   writeln("Aktualne stany:"),
-  show_states(RestQueue),
+  show_states([node(State, Action, Parent, Cost, Score)|RestQueue]),
   writeln("Czy kontynuowac? y/n"),
-  read(UserInput).
+  read(UserInput), UserInput == y.
+
+fetch(_, _, _, UserInput, _, _) :-
+  UserInput == y.
 
 fetch(Node, [ _ |RestQueue], ClosedSet, UserInput, NFirstCounter, NewRest) :-
   NFirstCounter > 0,
@@ -103,7 +100,7 @@ show_states([node(State, _, _, _, Score)|Rest]) :-
   show_states(Rest).
 
 expand(node(State, _, _, Cost, _), NewNodes)  :-
-  print("expanding.. "), %writeln(State),
+  %print("expanding.. "), %writeln(State),
   findall(node(ChildState, Action, State, NewCost, ChildScore) ,
   (succ(State, Action, StepCost, ChildState),
     score(ChildState, Cost, StepCost, NewCost, ChildScore) ) ,
