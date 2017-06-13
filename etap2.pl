@@ -33,8 +33,8 @@ start_A_star(InitState, PathCost) :-
 
 
 search_A_star(Queue, ClosedSet, PathCost) :-
-  fetch(Node, Queue, ClosedSet, RestQueue),
-  continue(Node, RestQueue, ClosedSet, PathCost).
+  fetch(Node, Queue, ClosedSet, RestQueue, NewClosedSet),
+  continue(Node, RestQueue, NewClosedSet, PathCost).
 
 
 continue(node(State, Action, Parent, Cost, _) , _, ClosedSet, path_cost(Path, Cost)) :-
@@ -53,7 +53,7 @@ fetch(node(State, Action,Parent, Cost, Score),
   \+ member(node(State, _, _, _, _), ClosedSet),  !.
 
 fetch(Node, [node(State, Action, Parent, Cost, Score) | RestQueue],
-		ClosedSet, FinalQueueRest, FinalClosedSet) :-
+  ClosedSet, FinalQueueRest, FinalClosedSet) :-
   member(node(State, _, _, Cost1, _), ClosedSet),
   Cost < Cost1,
   replace_node(node(State, Action, Parent, Cost, Score), ClosedSet, NewClosedSet),
@@ -64,7 +64,7 @@ fetch(Node, [node(State, Action, Parent, Cost, Score) | RestQueue],
   !.
 
 fetch(Node, [_ | RestQueue], ClosedSet, NewRest, NewClosedSet):-
-	fetch(Node, RestQueue, ClosedSet, NewRest, NewClosedSet).
+  fetch(Node, RestQueue, ClosedSet, NewRest, NewClosedSet).
 
 replace_node(node(State,Action,Parent,Cost,Score),
             [node(State,_,_,_,_)|Set],
